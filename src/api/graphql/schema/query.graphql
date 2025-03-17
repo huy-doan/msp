@@ -1,0 +1,6 @@
+type Query {
+  # User Queries
+  me: User!
+  user(id: ID!): User
+  users(page: Int, pageSize: Int): PaginatedUsers!
+}

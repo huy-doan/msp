@@ -1,0 +1,28 @@
+scalar Time
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  fullName: String!
+  role: Role!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type PaginatedUsers {
+  users: [User!]!
+  page: Int!
+  pageSize: Int!
+  totalPages: Int!
+}
+
+type AuthResponse {
+  token: String!
+  user: User!
+}

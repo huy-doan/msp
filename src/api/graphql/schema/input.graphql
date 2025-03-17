@@ -1,0 +1,20 @@
+input RegisterInput {
+  username: String!
+  email: String!
+  password: String!
+  fullName: String!
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+input UpdateProfileInput {
+  fullName: String!
+}
+
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
