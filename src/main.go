@@ -55,9 +55,10 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repositories.NewUserRepository(db)
+	roleRepo := repositories.NewRoleRepository(db)
 
 	// Create and start API server
-	server := api.NewServer(userRepo)
+	server := api.NewServer(userRepo, roleRepo)
 	if err := server.Start(); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

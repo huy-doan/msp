@@ -9,10 +9,7 @@ import (
 // UserRepository defines the interface for user data access
 type UserRepository interface {
 	// FindByID finds a user by ID
-	FindByID(ctx context.Context, id string) (*entities.User, error)
-
-	// FindByUsername finds a user by username
-	FindByUsername(ctx context.Context, username string) (*entities.User, error)
+	FindByID(ctx context.Context, id int) (*entities.User, error)
 
 	// FindByEmail finds a user by email
 	FindByEmail(ctx context.Context, email string) (*entities.User, error)
@@ -23,8 +20,8 @@ type UserRepository interface {
 	// Update updates an existing user
 	Update(ctx context.Context, user *entities.User) error
 
-	// Delete deletes a user by ID
-	Delete(ctx context.Context, id string) error
+	// Delete soft-deletes a user by ID
+	Delete(ctx context.Context, id int) error
 
 	// List lists all users with pagination
 	List(ctx context.Context, page, pageSize int) ([]*entities.User, int, error)

@@ -21,9 +21,10 @@ type JWTService struct {
 
 // TokenClaims represents the claims in a JWT token
 type TokenClaims struct {
-	UserID   string        `json:"user_id"`
-	Username string        `json:"username"`
-	Role     entities.Role `json:"role"`
+	UserID    int    `json:"user_id"`
+	Email     string `json:"email"`
+	RoleID    int    `json:"role_id"`
+	RoleCode  string `json:"role_code,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -34,8 +35,19 @@ func NewJWTService() *JWTService {
 		secret = "default_jwt_secret_key_change_in_production"
 	}
 
-	// Default token duration is 24 hours
-	tokenDuration := 24 * time.Hour
+	// Get token duration from environment (default 24 hours)
+	var tokenDuration time.Duration
+	tokenExpirationHours := os.Getenv("JWT_EXPIRATION_HOURS")
+	if tokenExpirationHours == "" {
+		tokenDuration = 24 * time.Hour
+	} else {
+		var hours int
+		fmt.Sscanf(tokenExpirationHours, "%d", &hours)
+		if hours <= 0 {
+			hours = 24
+		}
+		tokenDuration = time.Duration(hours) * time.Hour
+	}
 
 	return &JWTService{
 		secretKey:     secret,
@@ -50,14 +62,20 @@ func (s *JWTService) GenerateToken(user *entities.User) (string, error) {
 		return "", errors.New("user is nil")
 	}
 
+	roleCode := ""
+	if user.Role != nil {
+		roleCode = user.Role.Code
+	}
+
 	claims := TokenClaims{
-		UserID:   user.ID,
-		Username: user.Username,
-		Role:     user.Role,
+		UserID:    user.ID,
+		Email:     user.Email,
+		RoleID:    user.RoleID,
+		RoleCode:  roleCode,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.tokenDuration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Subject:   user.ID,
+			Subject:   fmt.Sprintf("%d", user.ID),
 		},
 	}
 
@@ -67,7 +85,7 @@ func (s *JWTService) GenerateToken(user *entities.User) (string, error) {
 
 // ValidateToken validates the provided token string and returns the claims
 func (s *JWTService) ValidateToken(tokenString string) (*TokenClaims, error) {
-	// check if the token is blacklisted
+	// Check if the token is blacklisted
 	s.mutex.RLock()
 	_, blacklisted := s.blacklist[tokenString]
 	s.mutex.RUnlock()
@@ -101,7 +119,7 @@ func (s *JWTService) BlacklistToken(tokenString string) {
 	defer s.mutex.Unlock()
 	s.blacklist[tokenString] = time.Now()
 	
-	// Auto cleanup expired tokens from the blacklist (can run in a separate goroutine)
+	// Auto cleanup expired tokens from the blacklist
 	s.cleanupBlacklist()
 }
 
@@ -113,9 +131,18 @@ func (s *JWTService) IsBlacklisted(tokenString string) bool {
 	return exists
 }
 
+// ExtractUserIDFromToken extracts user ID from a token string
+func (s *JWTService) ExtractUserIDFromToken(tokenString string) (int, error) {
+	claims, err := s.ValidateToken(tokenString)
+	if err != nil {
+		return 0, err
+	}
+	return claims.UserID, nil
+}
+
 // cleanupBlacklist removes expired tokens from the blacklist
 func (s *JWTService) cleanupBlacklist() {
-	// implement cleanupBlacklist in a goroutine to avoid blocking the main process
+	// Implement cleanupBlacklist in a goroutine to avoid blocking the main process
 	go func() {
 		// Ensure thread-safety when deleting
 		s.mutex.Lock()
@@ -129,13 +156,4 @@ func (s *JWTService) cleanupBlacklist() {
 			}
 		}
 	}()
-}
-
-// ExtractUserIDFromToken extracts user ID from a token string
-func (s *JWTService) ExtractUserIDFromToken(tokenString string) (string, error) {
-	claims, err := s.ValidateToken(tokenString)
-	if err != nil {
-		return "", err
-	}
-	return claims.UserID, nil
 }

@@ -11,7 +11,7 @@ type Resolver struct {
     jwtService     *auth.JWTService
 }
 
-// NewResolver
+// NewResolver creates a new resolver
 func NewResolver(
     userUsecase *usecase.UserUsecase,
     jwtService *auth.JWTService,

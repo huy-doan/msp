@@ -14,20 +14,20 @@ func SetupGraphQL(
 	userUsecase *usecase.UserUsecase,
 	jwtService *auth.JWTService,
 ) {
-	// set up authentication middleware for GraphQL
+	// Set up authentication middleware for GraphQL
 	graphAuthMiddleware := middleware.GraphQLAuthMiddleware(jwtService)
 
 	// Initialize GraphQL handler
 	graphHandler := handlers.NewGraphHandler(userUsecase, jwtService)
 
-	// Setup GraphQL endpoint với middleware
+	// Setup GraphQL endpoint with middleware
 	v1 := router.Group("/api/v1")
 	{
 		graphqlRoute := v1.Group("/graphql")
 		graphqlRoute.Use(graphAuthMiddleware)
 		{
 			// Main endpoint for GraphQL API
-			graphqlRoute.POST("", graphHandler.QueryHandler())
+			graphqlRoute.POST("/query", graphHandler.QueryHandler())
 		}
 	}
 }

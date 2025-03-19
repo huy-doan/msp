@@ -35,7 +35,7 @@ func GraphQLAuthMiddleware(jwtService *auth.JWTService) gin.HandlerFunc {
 		// Parse and validate the token
 		tokenString := headerParts[1]
 		
-		// Kiểm tra xem token có trong blacklist không
+		// Check if token is blacklisted
 		if jwtService.IsBlacklisted(tokenString) {
 			c.Next()
 			return
@@ -50,9 +50,10 @@ func GraphQLAuthMiddleware(jwtService *auth.JWTService) gin.HandlerFunc {
 		// Set authentication information in context
 		c.Set("authenticated", true)
 		c.Set("userId", claims.UserID)
-		c.Set("username", claims.Username)
-		c.Set("role", claims.Role)
-		c.Set("token", tokenString) // Lưu token vào context để sử dụng cho logout
+		c.Set("email", claims.Email)
+		c.Set("roleId", claims.RoleID)
+		c.Set("roleCode", claims.RoleCode)
+		c.Set("token", tokenString) // Save token in context for logout
 
 		c.Next()
 	}
@@ -60,7 +61,7 @@ func GraphQLAuthMiddleware(jwtService *auth.JWTService) gin.HandlerFunc {
 
 // WithAuth creates a GraphQL resolver context with auth information
 func WithAuth(ctx context.Context, c *gin.Context) context.Context {
-	for _, key := range []string{"authenticated", "userId", "username", "role", "token"} {
+	for _, key := range []string{"authenticated", "userId", "email", "roleId", "roleCode", "token"} {
 		if value, exists := c.Get(key); exists {
 			ctx = context.WithValue(ctx, key, value)
 		}
@@ -78,29 +79,49 @@ func CheckAuth(ctx context.Context) error {
 }
 
 // GetUserID extracts the user ID from context
-func GetUserID(ctx context.Context) (string, error) {
+func GetUserID(ctx context.Context) (int, error) {
     if err := CheckAuth(ctx); err != nil {
-        return "", err
+        return 0, err
     }
     
-    userID, ok := ctx.Value("userId").(string)
-    if !ok || userID == "" {
-        return "", errors.New("user ID not found in context")
+    userID, ok := ctx.Value("userId").(int)
+    if !ok {
+        return 0, errors.New("user ID not found in context")
     }
     
     return userID, nil
 }
 
-// CheckRole verifies if the user has the required role
-func CheckRole(ctx context.Context, requiredRole entities.Role) error {
+// GetUserEmail extracts the user email from context
+func GetUserEmail(ctx context.Context) (string, error) {
+    if err := CheckAuth(ctx); err != nil {
+        return "", err
+    }
+    
+    email, ok := ctx.Value("email").(string)
+    if !ok {
+        return "", errors.New("user email not found in context")
+    }
+    
+    return email, nil
+}
+
+// CheckRoleCode verifies if the user has the required role code
+func CheckRoleCode(ctx context.Context, requiredCode string) error {
     if err := CheckAuth(ctx); err != nil {
         return err
     }
     
-    role, ok := ctx.Value("role").(entities.Role)
-    if !ok || role != requiredRole {
-        return fmt.Errorf("permission denied: %s role required", requiredRole)
+    roleCode, ok := ctx.Value("roleCode").(string)
+    if !ok || roleCode != requiredCode {
+        return fmt.Errorf("permission denied: %s role required", requiredCode)
     }
     
     return nil
+}
+
+// IsAdminRole checks if the authenticated user has admin role
+func IsAdminRole(ctx context.Context) bool {
+    roleCode, ok := ctx.Value("roleCode").(string)
+    return ok && roleCode == string(entities.RoleCodeAdmin)
 }

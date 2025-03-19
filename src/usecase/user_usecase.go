@@ -11,30 +11,46 @@ import (
 
 // UserUsecase handles user-related business logic
 type UserUsecase struct {
-	userRepo   repositories.UserRepository
-	jwtService *auth.JWTService
+	userRepo    repositories.UserRepository
+	roleRepo    repositories.RoleRepository
+	jwtService  *auth.JWTService
 }
 
 // NewUserUseCase creates a new UserUsecase
-func NewUserUseCase(userRepo repositories.UserRepository, jwtService *auth.JWTService) *UserUsecase {
+func NewUserUseCase(
+	userRepo repositories.UserRepository,
+	roleRepo repositories.RoleRepository,
+	jwtService *auth.JWTService,
+) *UserUsecase {
 	return &UserUsecase{
-		userRepo:   userRepo,
-		jwtService: jwtService,
+		userRepo:    userRepo,
+		roleRepo:    roleRepo,
+		jwtService:  jwtService,
 	}
 }
 
 // LoginRequest represents a login request
 type LoginRequest struct {
-	Username string `json:"username" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
 
 // RegisterRequest represents a user registration request
 type RegisterRequest struct {
-	Username string `json:"username" binding:"required,min=3,max=50"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
-	FullName string `json:"full_name" binding:"required"`
+	Email         string `json:"email" binding:"required,email"`
+	Password      string `json:"password" binding:"required,min=6"`
+	FirstName     string `json:"first_name" binding:"required"`
+	LastName      string `json:"last_name" binding:"required"`
+	FirstNameKana string `json:"first_name_kana" binding:"required"`
+	LastNameKana  string `json:"last_name_kana" binding:"required"`
+}
+
+// UpdateProfileRequest represents a profile update request
+type UpdateProfileRequest struct {
+	FirstName     string `json:"first_name" binding:"required"`
+	LastName      string `json:"last_name" binding:"required"`
+	FirstNameKana string `json:"first_name_kana" binding:"required"`
+	LastNameKana  string `json:"last_name_kana" binding:"required"`
 }
 
 // LoginResponse represents a login response with token
@@ -45,17 +61,17 @@ type LoginResponse struct {
 
 // Login authenticates a user and returns a JWT token
 func (uc *UserUsecase) Login(ctx context.Context, req LoginRequest) (*LoginResponse, error) {
-	user, err := uc.userRepo.FindByUsername(ctx, req.Username)
+	user, err := uc.userRepo.FindByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, err
 	}
 
 	if user == nil {
-		return nil, errors.New("invalid username or password")
+		return nil, errors.New("invalid email or password")
 	}
 
 	if !user.VerifyPassword(req.Password) {
-		return nil, errors.New("invalid username or password")
+		return nil, errors.New("invalid email or password")
 	}
 
 	token, err := uc.jwtService.GenerateToken(user)
@@ -71,17 +87,8 @@ func (uc *UserUsecase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 
 // Register creates a new user
 func (uc *UserUsecase) Register(ctx context.Context, req RegisterRequest) (*entities.User, error) {
-	// Check if username already exists
-	existingUser, err := uc.userRepo.FindByUsername(ctx, req.Username)
-	if err != nil {
-		return nil, err
-	}
-	if existingUser != nil {
-		return nil, errors.New("username already exists")
-	}
-
 	// Check if email already exists
-	existingUser, err = uc.userRepo.FindByEmail(ctx, req.Email)
+	existingUser, err := uc.userRepo.FindByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -89,8 +96,25 @@ func (uc *UserUsecase) Register(ctx context.Context, req RegisterRequest) (*enti
 		return nil, errors.New("email already exists")
 	}
 
-	// Create new user with customer role by default
-	user, err := entities.NewUser(req.Username, req.Email, req.Password, req.FullName, entities.RoleCustomer)
+	// Get customer role
+	customerRole, err := uc.roleRepo.FindByCode(ctx, string(entities.RoleCodeCustomer))
+	if err != nil {
+		return nil, err
+	}
+	if customerRole == nil {
+		return nil, errors.New("customer role not found")
+	}
+
+	// Create new user with customer role
+	user, err := entities.NewUser(
+		req.Email,
+		req.Password,
+		req.FirstName,
+		req.LastName,
+		req.FirstNameKana,
+		req.LastNameKana,
+		customerRole.ID,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -100,16 +124,22 @@ func (uc *UserUsecase) Register(ctx context.Context, req RegisterRequest) (*enti
 		return nil, err
 	}
 
+	// Reload user to get the role relationship
+	user, err = uc.userRepo.FindByEmail(ctx, req.Email)
+	if err != nil {
+		return nil, err
+	}
+
 	return user, nil
 }
 
 // GetUserByID retrieves a user by ID
-func (uc *UserUsecase) GetUserByID(ctx context.Context, id string) (*entities.User, error) {
+func (uc *UserUsecase) GetUserByID(ctx context.Context, id int) (*entities.User, error) {
 	return uc.userRepo.FindByID(ctx, id)
 }
 
 // UpdateUserProfile updates a user's profile
-func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, userID string, fullName string) (*entities.User, error) {
+func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, userID int, req UpdateProfileRequest) (*entities.User, error) {
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -118,7 +148,7 @@ func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, userID string, ful
 		return nil, errors.New("user not found")
 	}
 
-	if err := user.UpdateProfile(fullName); err != nil {
+	if err := user.UpdateProfile(req.FirstName, req.LastName, req.FirstNameKana, req.LastNameKana); err != nil {
 		return nil, err
 	}
 
@@ -130,7 +160,7 @@ func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, userID string, ful
 }
 
 // ChangePassword changes a user's password
-func (uc *UserUsecase) ChangePassword(ctx context.Context, userID, currentPassword, newPassword string) error {
+func (uc *UserUsecase) ChangePassword(ctx context.Context, userID int, currentPassword, newPassword string) error {
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return err
@@ -162,7 +192,7 @@ func (uc *UserUsecase) ListUsers(ctx context.Context, page, pageSize int) ([]*en
 	return uc.userRepo.List(ctx, page, pageSize)
 }
 
-// GetJWTService trả về JWTService
+// GetJWTService returns the JWT service
 func (uc *UserUsecase) GetJWTService() *auth.JWTService {
 	return uc.jwtService
 }

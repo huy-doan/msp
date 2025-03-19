@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vnlab/makeshop-payment/src/api/graphql"
 	httpAPI "github.com/vnlab/makeshop-payment/src/api/http"
-	"github.com/vnlab/makeshop-payment/src/api/http/handlers"
 	"github.com/vnlab/makeshop-payment/src/domain/repositories"
 	"github.com/vnlab/makeshop-payment/src/infrastructure/auth"
 	"github.com/vnlab/makeshop-payment/src/lib/validator"
@@ -31,6 +30,7 @@ type Server struct {
 // NewServer creates a new API server
 func NewServer(
 	userRepo repositories.UserRepository,
+	roleRepo repositories.RoleRepository,
 ) *Server {
 	// Set Gin mode
 	ginMode := os.Getenv("GIN_MODE")
@@ -46,17 +46,11 @@ func NewServer(
 
 	// Initialize services
 	jwtService := auth.NewJWTService()
-	userUsecase := usecase.NewUserUseCase(userRepo, jwtService)
-
-	// Initialize HTTP handlers
-	authHandler := handlers.NewAuthHandler(userUsecase)
-	userHandler := handlers.NewUserHandler(userUsecase)
+	userUsecase := usecase.NewUserUseCase(userRepo, roleRepo, jwtService)
 
 	// Set up HTTP routes - FIX: Save the router returned from SetupRouter
 	router = httpAPI.SetupRouter(
 		router,
-		authHandler,
-		userHandler,
 		jwtService,
 	)
 

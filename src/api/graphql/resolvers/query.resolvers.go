@@ -26,11 +26,12 @@ var (
 
 // Me returns the currently authenticated user
 func (r *queryResolver) Me(ctx context.Context) (*entities.User, error) {
-	// Check Auth
+	// Check auth
 	err := middleware.CheckAuth(ctx)
 	if err != nil {
 		return nil, ErrNotAuthenticated
 	}
+	
 	userId, err := middleware.GetUserID(ctx)
 	if err != nil {
 		return nil, ErrNotAuthenticated
@@ -45,15 +46,15 @@ func (r *queryResolver) Me(ctx context.Context) (*entities.User, error) {
 }
 
 // User returns a user by ID
-func (r *queryResolver) User(ctx context.Context, id string) (*entities.User, error) {
-	// Check Auth
+func (r *queryResolver) User(ctx context.Context, id int) (*entities.User, error) {
+	// Check auth
 	err := middleware.CheckAuth(ctx)
 	if err != nil {
 		return nil, ErrNotAuthenticated
 	}
-	// Check Role
-	err = middleware.CheckRole(ctx, entities.RoleAdmin)
-	if err != nil {
+	
+	// Check if the user has admin rights
+	if !middleware.IsAdminRole(ctx) {
 		return nil, ErrForbidden
 	}
 
@@ -67,14 +68,14 @@ func (r *queryResolver) User(ctx context.Context, id string) (*entities.User, er
 
 // Users returns a paginated list of users
 func (r *queryResolver) Users(ctx context.Context, page *int, pageSize *int) (*generated.PaginatedUsers, error) {
-	// Check Auth
+	// Check auth
 	err := middleware.CheckAuth(ctx)
 	if err != nil {
 		return nil, ErrNotAuthenticated
 	}
-	// Check Role
-	err = middleware.CheckRole(ctx, entities.RoleAdmin)
-	if err != nil {
+	
+	// Check if the user has admin rights
+	if !middleware.IsAdminRole(ctx) {
 		return nil, ErrForbidden
 	}
 

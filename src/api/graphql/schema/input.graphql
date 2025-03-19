@@ -1,20 +1,30 @@
 input RegisterInput {
-  username: String!
   email: String!
   password: String!
-  fullName: String!
+  firstName: String!
+  lastName: String!
+  firstNameKana: String!
+  lastNameKana: String!
 }
 
 input LoginInput {
-  username: String!
+  email: String!
   password: String!
 }
 
 input UpdateProfileInput {
-  fullName: String!
+  firstName: String!
+  lastName: String!
+  firstNameKana: String!
+  lastNameKana: String!
 }
 
 input ChangePasswordInput {
   currentPassword: String!
   newPassword: String!
+}
+
+input MFASettingsInput {
+  enabled: Boolean!
+  typeId: Int
 }

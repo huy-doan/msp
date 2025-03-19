@@ -21,7 +21,7 @@ type mutationResolver struct {
 // Login implements the login mutation
 func (r *mutationResolver) Login(ctx context.Context, input generated.LoginInput) (*generated.AuthResponse, error) {
 	loginReq := usecase.LoginRequest{
-		Username: input.Username,
+		Email:    input.Email,
 		Password: input.Password,
 	}
 
@@ -39,10 +39,12 @@ func (r *mutationResolver) Login(ctx context.Context, input generated.LoginInput
 // Register implements the register mutation
 func (r *mutationResolver) Register(ctx context.Context, input generated.RegisterInput) (*entities.User, error) {
 	registerReq := usecase.RegisterRequest{
-		Username: input.Username,
-		Email:    input.Email,
-		Password: input.Password,
-		FullName: input.FullName,
+		Email:         input.Email,
+		Password:      input.Password,
+		FirstName:     input.FirstName,
+		LastName:      input.LastName,
+		FirstNameKana: input.FirstNameKana,
+		LastNameKana:  input.LastNameKana,
 	}
 
 	user, err := r.userUsecase.Register(ctx, registerReq)
@@ -59,12 +61,20 @@ func (r *mutationResolver) UpdateProfile(ctx context.Context, input generated.Up
 	if err != nil {
 		return nil, ErrNotAuthenticated
 	}
+	
 	userId, err := middleware.GetUserID(ctx)
 	if err != nil {
 		return nil, ErrNotAuthenticated
 	}
 
-	user, err := r.userUsecase.UpdateUserProfile(ctx, userId, input.FullName)
+	updateReq := usecase.UpdateProfileRequest{
+		FirstName:     input.FirstName,
+		LastName:      input.LastName,
+		FirstNameKana: input.FirstNameKana,
+		LastNameKana:  input.LastNameKana,
+	}
+
+	user, err := r.userUsecase.UpdateUserProfile(ctx, userId, updateReq)
 	if err != nil {
 		return nil, err
 	}
@@ -78,6 +88,7 @@ func (r *mutationResolver) ChangePassword(ctx context.Context, input generated.C
 	if err != nil {
 		return false, ErrNotAuthenticated
 	}
+	
 	userId, err := middleware.GetUserID(ctx)
 	if err != nil {
 		return false, ErrNotAuthenticated
@@ -98,13 +109,13 @@ func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
 		return false, ErrNotAuthenticated
 	}
 
-	// get token from context (added token to context in middleware)
+	// Get token from context (added by middleware)
 	token, ok := ctx.Value("token").(string)
 	if ok && token != "" {
-		// Thêm token vào blacklist
+		// Add token to blacklist
 		r.jwtService.BlacklistToken(token)
 	}
 	
-	// return true to confirm successful logout
+	// Return true to confirm successful logout
 	return true, nil
 }

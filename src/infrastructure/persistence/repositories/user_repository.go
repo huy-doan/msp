@@ -10,72 +10,62 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserRepositoryInfra implements the UserRepository interface
-type UserRepositoryInfra struct {
+// UserRepositoryImpl implements the UserRepository interface
+type UserRepositoryImpl struct {
 	db *gorm.DB
 }
 
 // NewUserRepository creates a new UserRepository
 func NewUserRepository(db *gorm.DB) repositories.UserRepository {
-	return &UserRepositoryInfra{
+	return &UserRepositoryImpl{
 		db: db,
 	}
 }
 
 // FindByID finds a user by ID
-func (r *UserRepositoryInfra) FindByID(ctx context.Context, id string) (model *entities.User, err error) {
-	if err := r.db.First(&model, "id = ?", id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+func (r *UserRepositoryImpl) FindByID(ctx context.Context, id int) (*entities.User, error) {
+	var user entities.User
+	result := r.db.Preload("Role").First(&user, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil // Return nil if user not found
 		}
-		return nil, err
+		return nil, result.Error
 	}
-	return model, nil
-}
-
-// FindByUsername finds a user by username
-func (r *UserRepositoryInfra) FindByUsername(ctx context.Context, username string) (model *entities.User, err error) {
-	if err := r.db.First(&model, "username = ?", username).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil // Return nil if user not found
-		}
-		return nil, err
-	}
-
-	return model, nil
+	return &user, nil
 }
 
 // FindByEmail finds a user by email
-func (r *UserRepositoryInfra) FindByEmail(ctx context.Context, email string) (model *entities.User, err error) {
-	if err := r.db.First(&model, "email = ?", email).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+func (r *UserRepositoryImpl) FindByEmail(ctx context.Context, email string) (*entities.User, error) {
+	var user entities.User
+	result := r.db.Preload("Role").Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil // Return nil if user not found
 		}
-		return nil, err
+		return nil, result.Error
 	}
-	return model, nil
+	return &user, nil
 }
 
 // Create creates a new user
-func (r *UserRepositoryInfra) Create(ctx context.Context, user *entities.User) error {
-	model := &entities.User{}
-	return r.db.Create(model).Error
+func (r *UserRepositoryImpl) Create(ctx context.Context, user *entities.User) error {
+	return r.db.Create(user).Error
 }
 
 // Update updates an existing user
-func (r *UserRepositoryInfra) Update(ctx context.Context, user *entities.User) error {
-	model := &entities.User{}
-	return r.db.Save(model).Error
+func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) error {
+	return r.db.Save(user).Error
 }
 
-// Delete deletes a user by ID
-func (r *UserRepositoryInfra) Delete(ctx context.Context, id string) error {
-	return r.db.Delete(&entities.User{}, "id = ?", id).Error
+// Delete soft-deletes a user by ID
+func (r *UserRepositoryImpl) Delete(ctx context.Context, id int) error {
+	return r.db.Delete(&entities.User{}, id).Error
 }
 
 // List lists all users with pagination
-func (r *UserRepositoryInfra) List(ctx context.Context, page, pageSize int) ([]*entities.User, int, error) {
-	var models []*entities.User
+func (r *UserRepositoryImpl) List(ctx context.Context, page, pageSize int) ([]*entities.User, int, error) {
+	var users []*entities.User
 	var count int64
 
 	// Count total records
@@ -85,14 +75,8 @@ func (r *UserRepositoryInfra) List(ctx context.Context, page, pageSize int) ([]*
 
 	// Apply pagination
 	offset := (page - 1) * pageSize
-	if err := r.db.Offset(offset).Limit(pageSize).Find(&models).Error; err != nil {
+	if err := r.db.Preload("Role").Offset(offset).Limit(pageSize).Find(&users).Error; err != nil {
 		return nil, 0, err
-	}
-
-	// Convert to domain entities
-	users := make([]*entities.User, len(models))
-	for i, model := range models {
-		users[i] = model
 	}
 
 	totalPages := int(math.Ceil(float64(count) / float64(pageSize)))

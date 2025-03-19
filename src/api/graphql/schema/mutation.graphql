@@ -3,6 +3,8 @@ type Mutation {
   register(input: RegisterInput!): User!
   login(input: LoginInput!): AuthResponse!
   logout: Boolean!
+  
+  # User Mutations
   updateProfile(input: UpdateProfileInput!): User!
   changePassword(input: ChangePasswordInput!): Boolean!
 }

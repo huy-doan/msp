@@ -1,16 +1,42 @@
 scalar Time
 
-enum Role {
+enum RoleCode {
   ADMIN
   CUSTOMER
 }
 
+type Role {
+  id: ID!
+  name: String!
+  code: String!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+type MFAType {
+  id: ID!
+  no: Int!
+  title: String!
+  isActive: Int!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
 type User {
   id: ID!
-  username: String!
   email: String!
+  roleId: Int!
+  role: Role
+  enabledMFA: Boolean!
+  enabledMFATypeId: Int
+  mfaType: MFAType
+  firstName: String!
+  lastName: String!
+  firstNameKana: String!
+  lastNameKana: String!
+  avatarUrl: String
   fullName: String!
-  role: Role!
+  fullNameKana: String!
   createdAt: Time!
   updatedAt: Time!
 }
