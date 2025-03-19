@@ -27,7 +27,7 @@ func SetupGraphQL(
 		graphqlRoute.Use(graphAuthMiddleware)
 		{
 			// Main endpoint for GraphQL API
-			graphqlRoute.POST("/query", graphHandler.QueryHandler())
+			graphqlRoute.POST("", graphHandler.QueryHandler())
 		}
 	}
 }

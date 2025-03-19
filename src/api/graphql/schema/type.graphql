@@ -1,12 +1,12 @@
 scalar Time
 
-enum RoleCode {
-  ADMIN
-  CUSTOMER
-}
+# enum RoleCode {
+#   ADMIN
+#   CUSTOMER
+# }
 
 type Role {
-  id: ID!
+  id: Int!
   name: String!
   code: String!
   createdAt: Time!
@@ -14,7 +14,7 @@ type Role {
 }
 
 type MFAType {
-  id: ID!
+  id: Int!
   no: Int!
   title: String!
   isActive: Int!
@@ -23,12 +23,12 @@ type MFAType {
 }
 
 type User {
-  id: ID!
+  id: Int!
   email: String!
   roleId: Int!
   role: Role
   enabledMFA: Boolean!
-  enabledMFATypeId: Int
+  mFATypeId: Int
   mfaType: MFAType
   firstName: String!
   lastName: String!

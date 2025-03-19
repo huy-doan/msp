@@ -79,7 +79,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Me    func(childComplexity int) int
-		User  func(childComplexity int, id string) int
+		User  func(childComplexity int, id int) int
 		Users func(childComplexity int, page *int, pageSize *int) int
 	}
 
@@ -92,22 +92,22 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		AvatarURL        func(childComplexity int) int
-		CreatedAt        func(childComplexity int) int
-		Email            func(childComplexity int) int
-		EnabledMFA       func(childComplexity int) int
-		EnabledMFATypeID func(childComplexity int) int
-		FirstName        func(childComplexity int) int
-		FirstNameKana    func(childComplexity int) int
-		FullName         func(childComplexity int) int
-		FullNameKana     func(childComplexity int) int
-		ID               func(childComplexity int) int
-		LastName         func(childComplexity int) int
-		LastNameKana     func(childComplexity int) int
-		MfaType          func(childComplexity int) int
-		Role             func(childComplexity int) int
-		RoleID           func(childComplexity int) int
-		UpdatedAt        func(childComplexity int) int
+		AvatarURL     func(childComplexity int) int
+		CreatedAt     func(childComplexity int) int
+		Email         func(childComplexity int) int
+		EnabledMFA    func(childComplexity int) int
+		FirstName     func(childComplexity int) int
+		FirstNameKana func(childComplexity int) int
+		FullName      func(childComplexity int) int
+		FullNameKana  func(childComplexity int) int
+		ID            func(childComplexity int) int
+		LastName      func(childComplexity int) int
+		LastNameKana  func(childComplexity int) int
+		MFATypeID     func(childComplexity int) int
+		MfaType       func(childComplexity int) int
+		Role          func(childComplexity int) int
+		RoleID        func(childComplexity int) int
+		UpdatedAt     func(childComplexity int) int
 	}
 }
 
@@ -120,7 +120,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*entities.User, error)
-	User(ctx context.Context, id string) (*entities.User, error)
+	User(ctx context.Context, id int) (*entities.User, error)
 	Users(ctx context.Context, page *int, pageSize *int) (*PaginatedUsers, error)
 }
 type UserResolver interface {
@@ -302,7 +302,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.User(childComplexity, args["id"].(int)), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -379,13 +379,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.EnabledMFA(childComplexity), true
 
-	case "User.enabledMFATypeId":
-		if e.complexity.User.EnabledMFATypeID == nil {
-			break
-		}
-
-		return e.complexity.User.EnabledMFATypeID(childComplexity), true
-
 	case "User.firstName":
 		if e.complexity.User.FirstName == nil {
 			break
@@ -434,6 +427,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.LastNameKana(childComplexity), true
+
+	case "User.mFATypeId":
+		if e.complexity.User.MFATypeID == nil {
+			break
+		}
+
+		return e.complexity.User.MFATypeID(childComplexity), true
 
 	case "User.mfaType":
 		if e.complexity.User.MfaType == nil {
@@ -618,19 +618,19 @@ input MFASettingsInput {
 	{Name: "../schema/query.graphql", Input: `type Query {
   # User Queries
   me: User!
-  user(id: ID!): User
+  user(id: Int!): User
   users(page: Int, pageSize: Int): PaginatedUsers!
 }
 `, BuiltIn: false},
 	{Name: "../schema/type.graphql", Input: `scalar Time
 
-enum RoleCode {
-  ADMIN
-  CUSTOMER
-}
+# enum RoleCode {
+#   ADMIN
+#   CUSTOMER
+# }
 
 type Role {
-  id: ID!
+  id: Int!
   name: String!
   code: String!
   createdAt: Time!
@@ -638,7 +638,7 @@ type Role {
 }
 
 type MFAType {
-  id: ID!
+  id: Int!
   no: Int!
   title: String!
   isActive: Int!
@@ -647,12 +647,12 @@ type MFAType {
 }
 
 type User {
-  id: ID!
+  id: Int!
   email: String!
   roleId: Int!
   role: Role
   enabledMFA: Boolean!
-  enabledMFATypeId: Int
+  mFATypeId: Int
   mfaType: MFAType
   firstName: String!
   lastName: String!
@@ -762,10 +762,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -929,8 +929,8 @@ func (ec *executionContext) fieldContext_AuthResponse_user(ctx context.Context, 
 				return ec.fieldContext_User_role(ctx, field)
 			case "enabledMFA":
 				return ec.fieldContext_User_enabledMFA(ctx, field)
-			case "enabledMFATypeId":
-				return ec.fieldContext_User_enabledMFATypeId(ctx, field)
+			case "mFATypeId":
+				return ec.fieldContext_User_mFATypeId(ctx, field)
 			case "mfaType":
 				return ec.fieldContext_User_mfaType(ctx, field)
 			case "firstName":
@@ -984,9 +984,9 @@ func (ec *executionContext) _MFAType_id(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_MFAType_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -996,7 +996,7 @@ func (ec *executionContext) fieldContext_MFAType_id(ctx context.Context, field g
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1271,8 +1271,8 @@ func (ec *executionContext) fieldContext_Mutation_register(ctx context.Context, 
 				return ec.fieldContext_User_role(ctx, field)
 			case "enabledMFA":
 				return ec.fieldContext_User_enabledMFA(ctx, field)
-			case "enabledMFATypeId":
-				return ec.fieldContext_User_enabledMFATypeId(ctx, field)
+			case "mFATypeId":
+				return ec.fieldContext_User_mFATypeId(ctx, field)
 			case "mfaType":
 				return ec.fieldContext_User_mfaType(ctx, field)
 			case "firstName":
@@ -1465,8 +1465,8 @@ func (ec *executionContext) fieldContext_Mutation_updateProfile(ctx context.Cont
 				return ec.fieldContext_User_role(ctx, field)
 			case "enabledMFA":
 				return ec.fieldContext_User_enabledMFA(ctx, field)
-			case "enabledMFATypeId":
-				return ec.fieldContext_User_enabledMFATypeId(ctx, field)
+			case "mFATypeId":
+				return ec.fieldContext_User_mFATypeId(ctx, field)
 			case "mfaType":
 				return ec.fieldContext_User_mfaType(ctx, field)
 			case "firstName":
@@ -1609,8 +1609,8 @@ func (ec *executionContext) fieldContext_PaginatedUsers_users(ctx context.Contex
 				return ec.fieldContext_User_role(ctx, field)
 			case "enabledMFA":
 				return ec.fieldContext_User_enabledMFA(ctx, field)
-			case "enabledMFATypeId":
-				return ec.fieldContext_User_enabledMFATypeId(ctx, field)
+			case "mFATypeId":
+				return ec.fieldContext_User_mFATypeId(ctx, field)
 			case "mfaType":
 				return ec.fieldContext_User_mfaType(ctx, field)
 			case "firstName":
@@ -1819,8 +1819,8 @@ func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field gra
 				return ec.fieldContext_User_role(ctx, field)
 			case "enabledMFA":
 				return ec.fieldContext_User_enabledMFA(ctx, field)
-			case "enabledMFATypeId":
-				return ec.fieldContext_User_enabledMFATypeId(ctx, field)
+			case "mFATypeId":
+				return ec.fieldContext_User_mFATypeId(ctx, field)
 			case "mfaType":
 				return ec.fieldContext_User_mfaType(ctx, field)
 			case "firstName":
@@ -1862,7 +1862,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().User(rctx, fc.Args["id"].(string))
+		return ec.resolvers.Query().User(rctx, fc.Args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1894,8 +1894,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_role(ctx, field)
 			case "enabledMFA":
 				return ec.fieldContext_User_enabledMFA(ctx, field)
-			case "enabledMFATypeId":
-				return ec.fieldContext_User_enabledMFATypeId(ctx, field)
+			case "mFATypeId":
+				return ec.fieldContext_User_mFATypeId(ctx, field)
 			case "mfaType":
 				return ec.fieldContext_User_mfaType(ctx, field)
 			case "firstName":
@@ -2156,7 +2156,7 @@ func (ec *executionContext) _Role_id(ctx context.Context, field graphql.Collecte
 	}
 	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Role_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2166,7 +2166,7 @@ func (ec *executionContext) fieldContext_Role_id(ctx context.Context, field grap
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2376,7 +2376,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	}
 	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2386,7 +2386,7 @@ func (ec *executionContext) fieldContext_User_id(ctx context.Context, field grap
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2577,8 +2577,8 @@ func (ec *executionContext) fieldContext_User_enabledMFA(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _User_enabledMFATypeId(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_enabledMFATypeId(ctx, field)
+func (ec *executionContext) _User_mFATypeId(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_mFATypeId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2591,7 +2591,7 @@ func (ec *executionContext) _User_enabledMFATypeId(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.EnabledMFATypeID, nil
+		return obj.MFATypeID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2605,7 +2605,7 @@ func (ec *executionContext) _User_enabledMFATypeId(ctx context.Context, field gr
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_enabledMFATypeId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_mFATypeId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -5503,8 +5503,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "enabledMFATypeId":
-			out.Values[i] = ec._User_enabledMFATypeId(ctx, field, obj)
+		case "mFATypeId":
+			out.Values[i] = ec._User_mFATypeId(ctx, field, obj)
 		case "mfaType":
 			field := field
 
@@ -5961,36 +5961,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 func (ec *executionContext) unmarshalNChangePasswordInput2githubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋapiᚋgraphqlᚋgeneratedᚐChangePasswordInput(ctx context.Context, v interface{}) (ChangePasswordInput, error) {
 	res, err := ec.unmarshalInputChangePasswordInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNID2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNID2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	res := graphql.MarshalInt(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalID(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {

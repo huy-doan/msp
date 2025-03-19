@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
   `password_hash` varchar(255) NOT NULL,
   `role_id` int NOT NULL,
   `enabled_mfa` tinyint(1) NOT NULL DEFAULT '1',
-  `enabled_mfa_type_id` int DEFAULT NULL,
+  `mfa_type_id` int DEFAULT NULL,
   `last_name` varchar(100) NOT NULL,
   `first_name` varchar(100) NOT NULL,
   `last_name_kana` varchar(100) NOT NULL,
@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS users (
   UNIQUE KEY `email` (`email`),
   KEY `deleted_at` (`deleted_at`),
   KEY `fk_users_role` (`role_id`),
-  KEY `fk_users_mfa_type` (`enabled_mfa_type_id`),
-  CONSTRAINT `fk_users_mfa_type` FOREIGN KEY (`enabled_mfa_type_id`) REFERENCES `master_mfa_types` (`id`) ON DELETE SET NULL,
+  KEY `fk_users_mfa_type` (`mfa_type_id`),
+  CONSTRAINT `fk_users_mfa_type` FOREIGN KEY (`mfa_type_id`) REFERENCES `master_mfa_types` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_users_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT
 );
 -- +goose StatementEnd

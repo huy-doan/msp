@@ -30,7 +30,7 @@ func SetupRouter(
 	})
 
 	// Setup Swagger
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("/swaggers/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return router
 }

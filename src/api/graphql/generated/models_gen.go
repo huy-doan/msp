@@ -3,9 +3,6 @@
 package generated
 
 import (
-	"fmt"
-	"io"
-	"strconv"
 	"time"
 
 	"github.com/vnlab/makeshop-payment/src/domain/entities"
@@ -32,7 +29,7 @@ type MFASettingsInput struct {
 }
 
 type MFAType struct {
-	ID        string    `json:"id"`
+	ID        int       `json:"id"`
 	No        int       `json:"no"`
 	Title     string    `json:"title"`
 	IsActive  int       `json:"isActive"`
@@ -67,45 +64,4 @@ type UpdateProfileInput struct {
 	LastName      string `json:"lastName"`
 	FirstNameKana string `json:"firstNameKana"`
 	LastNameKana  string `json:"lastNameKana"`
-}
-
-type RoleCode string
-
-const (
-	RoleCodeAdmin    RoleCode = "ADMIN"
-	RoleCodeCustomer RoleCode = "CUSTOMER"
-)
-
-var AllRoleCode = []RoleCode{
-	RoleCodeAdmin,
-	RoleCodeCustomer,
-}
-
-func (e RoleCode) IsValid() bool {
-	switch e {
-	case RoleCodeAdmin, RoleCodeCustomer:
-		return true
-	}
-	return false
-}
-
-func (e RoleCode) String() string {
-	return string(e)
-}
-
-func (e *RoleCode) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = RoleCode(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid RoleCode", str)
-	}
-	return nil
-}
-
-func (e RoleCode) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }

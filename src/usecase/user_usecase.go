@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/vnlab/makeshop-payment/src/domain/entities"
 	"github.com/vnlab/makeshop-payment/src/domain/repositories"
@@ -62,16 +63,17 @@ type LoginResponse struct {
 // Login authenticates a user and returns a JWT token
 func (uc *UserUsecase) Login(ctx context.Context, req LoginRequest) (*LoginResponse, error) {
 	user, err := uc.userRepo.FindByEmail(ctx, req.Email)
+	fmt.Printf("user: %v\n", user)
 	if err != nil {
 		return nil, err
 	}
 
 	if user == nil {
-		return nil, errors.New("invalid email or password")
+		return nil, errors.New("invalid email or password 1")
 	}
 
 	if !user.VerifyPassword(req.Password) {
-		return nil, errors.New("invalid email or password")
+		return nil, errors.New("invalid email or password 2")
 	}
 
 	token, err := uc.jwtService.GenerateToken(user)
@@ -97,7 +99,7 @@ func (uc *UserUsecase) Register(ctx context.Context, req RegisterRequest) (*enti
 	}
 
 	// Get customer role
-	customerRole, err := uc.roleRepo.FindByCode(ctx, string(entities.RoleCodeCustomer))
+	customerRole, err := uc.roleRepo.FindByCode(ctx, string(entities.RoleCodeNormalUser))
 	if err != nil {
 		return nil, err
 	}
