@@ -30,6 +30,14 @@ func AuthMiddleware(jwtService *auth.JWTService) gin.HandlerFunc {
 
 		// Parse and validate the token
 		tokenString := headerParts[1]
+		
+		// Kiểm tra xem token có trong blacklist không
+		if jwtService.IsBlacklisted(tokenString) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "token has been revoked"})
+			c.Abort()
+			return
+		}
+		
 		claims, err := jwtService.ValidateToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
@@ -41,6 +49,7 @@ func AuthMiddleware(jwtService *auth.JWTService) gin.HandlerFunc {
 		c.Set("userId", claims.UserID)
 		c.Set("username", claims.Username)
 		c.Set("role", claims.Role)
+		c.Set("token", tokenString) // save token in context for logout
 
 		c.Next()
 	}

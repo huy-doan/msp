@@ -1,8 +1,8 @@
-
 type Mutation {
   # Auth Mutations
   register(input: RegisterInput!): User!
   login(input: LoginInput!): AuthResponse!
+  logout: Boolean!
   updateProfile(input: UpdateProfileInput!): User!
   changePassword(input: ChangePasswordInput!): Boolean!
 }

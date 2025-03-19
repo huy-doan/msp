@@ -18,18 +18,24 @@ const (
 
 // User represents a user entity
 type User struct {
-	ID        string    `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"` // Password is never exposed in JSON
-	FullName  string    `json:"full_name"`
-	Role      Role      `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        string    `json:"id" gorm:"type:varchar(36);primary_key"`
+	Username  string    `json:"username" gorm:"type:varchar(100);uniqueIndex"`
+	Email     string    `json:"email" gorm:"type:varchar(255);uniqueIndex"`
+	Password  string    `json:"-" gorm:"type:varchar(255)"` // Password is never exposed in JSON
+	FullName  string    `json:"full_name" gorm:"type:varchar(255)"`
+	Role      Role      `json:"role" gorm:"type:varchar(50)"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+}
+
+// TableName specifies the database table name
+func (User) TableName() string {
+	return "users"
 }
 
 // NewUser creates a new user with the given details
 func NewUser(username, email, password, fullName string, role Role) (*User, error) {
+	// Validation logic unchanged
 	if username == "" {
 		return nil, errors.New("username cannot be empty")
 	}

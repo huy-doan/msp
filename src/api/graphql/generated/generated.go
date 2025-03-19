@@ -55,6 +55,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		ChangePassword func(childComplexity int, input ChangePasswordInput) int
 		Login          func(childComplexity int, input LoginInput) int
+		Logout         func(childComplexity int) int
 		Register       func(childComplexity int, input RegisterInput) int
 		UpdateProfile  func(childComplexity int, input UpdateProfileInput) int
 	}
@@ -86,6 +87,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	Register(ctx context.Context, input RegisterInput) (*entities.User, error)
 	Login(ctx context.Context, input LoginInput) (*AuthResponse, error)
+	Logout(ctx context.Context) (bool, error)
 	UpdateProfile(ctx context.Context, input UpdateProfileInput) (*entities.User, error)
 	ChangePassword(ctx context.Context, input ChangePasswordInput) (bool, error)
 }
@@ -151,6 +153,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Login(childComplexity, args["input"].(LoginInput)), true
+
+	case "Mutation.logout":
+		if e.complexity.Mutation.Logout == nil {
+			break
+		}
+
+		return e.complexity.Mutation.Logout(childComplexity), true
 
 	case "Mutation.register":
 		if e.complexity.Mutation.Register == nil {
@@ -393,9 +402,44 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema/schema.graphql", Input: `# GraphQL Schema
+	{Name: "../schema/input.graphql", Input: `input RegisterInput {
+  username: String!
+  email: String!
+  password: String!
+  fullName: String!
+}
 
-scalar Time
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+input UpdateProfileInput {
+  fullName: String!
+}
+
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+`, BuiltIn: false},
+	{Name: "../schema/mutation.graphql", Input: `type Mutation {
+  # Auth Mutations
+  register(input: RegisterInput!): User!
+  login(input: LoginInput!): AuthResponse!
+  logout: Boolean!
+  updateProfile(input: UpdateProfileInput!): User!
+  changePassword(input: ChangePasswordInput!): Boolean!
+}
+`, BuiltIn: false},
+	{Name: "../schema/query.graphql", Input: `type Query {
+  # User Queries
+  me: User!
+  user(id: ID!): User
+  users(page: Int, pageSize: Int): PaginatedUsers!
+}
+`, BuiltIn: false},
+	{Name: "../schema/type.graphql", Input: `scalar Time
 
 enum Role {
   ADMIN
@@ -422,42 +466,6 @@ type PaginatedUsers {
 type AuthResponse {
   token: String!
   user: User!
-}
-
-input RegisterInput {
-  username: String!
-  email: String!
-  password: String!
-  fullName: String!
-}
-
-input LoginInput {
-  username: String!
-  password: String!
-}
-
-input UpdateProfileInput {
-  fullName: String!
-}
-
-input ChangePasswordInput {
-  currentPassword: String!
-  newPassword: String!
-}
-
-type Query {
-  # User Queries
-  me: User!
-  user(id: ID!): User
-  users(page: Int, pageSize: Int): PaginatedUsers!
-}
-
-type Mutation {
-  # Auth Mutations
-  register(input: RegisterInput!): User!
-  login(input: LoginInput!): AuthResponse!
-  updateProfile(input: UpdateProfileInput!): User!
-  changePassword(input: ChangePasswordInput!): Boolean!
 }
 `, BuiltIn: false},
 }
@@ -851,6 +859,50 @@ func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, fie
 	if fc.Args, err = ec.field_Mutation_login_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_logout(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_logout(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Logout(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_logout(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -3800,6 +3852,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "login":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_login(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "logout":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_logout(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

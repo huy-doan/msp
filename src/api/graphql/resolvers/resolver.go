@@ -1,23 +1,23 @@
 package resolvers
 
 import (
-	"github.com/vnlab/makeshop-payment/src/application/services"
 	"github.com/vnlab/makeshop-payment/src/infrastructure/auth"
+	"github.com/vnlab/makeshop-payment/src/usecase"
 )
 
-// Resolver là resolver gốc
+// Root Resolver
 type Resolver struct {
-    userService    *services.UserService
+    userUsecase    *usecase.UserUsecase
     jwtService     *auth.JWTService
 }
 
-// NewResolver tạo resolver mới
+// NewResolver
 func NewResolver(
-    userService *services.UserService,
+    userUsecase *usecase.UserUsecase,
     jwtService *auth.JWTService,
 ) *Resolver {
     return &Resolver{
-        userService:    userService,
-        jwtService:     jwtService,
+        userUsecase: userUsecase,
+        jwtService:  jwtService,
     }
 }

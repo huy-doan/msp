@@ -14,9 +14,10 @@ import (
 	"github.com/vnlab/makeshop-payment/src/api/graphql"
 	httpAPI "github.com/vnlab/makeshop-payment/src/api/http"
 	"github.com/vnlab/makeshop-payment/src/api/http/handlers"
-	"github.com/vnlab/makeshop-payment/src/application/services"
 	"github.com/vnlab/makeshop-payment/src/domain/repositories"
 	"github.com/vnlab/makeshop-payment/src/infrastructure/auth"
+	"github.com/vnlab/makeshop-payment/src/lib/validator"
+	"github.com/vnlab/makeshop-payment/src/usecase"
 )
 
 // Server represents the API server
@@ -24,7 +25,7 @@ type Server struct {
 	router         *gin.Engine
 	httpServer     *http.Server
 	jwtService     *auth.JWTService
-	userService    *services.UserService
+	userUsecase    *usecase.UserUsecase
 }
 
 // NewServer creates a new API server
@@ -37,16 +38,19 @@ func NewServer(
 		gin.SetMode(ginMode)
 	}
 
+	// Set up validator
+	validator.Setup()
+
 	// Create router
 	router := gin.Default()
 
 	// Initialize services
 	jwtService := auth.NewJWTService()
-	userService := services.NewUserService(userRepo, jwtService)
+	userUsecase := usecase.NewUserUseCase(userRepo, jwtService)
 
 	// Initialize HTTP handlers
-	authHandler := handlers.NewAuthHandler(userService)
-	userHandler := handlers.NewUserHandler(userService)
+	authHandler := handlers.NewAuthHandler(userUsecase)
+	userHandler := handlers.NewUserHandler(userUsecase)
 
 	// Set up HTTP routes - FIX: Save the router returned from SetupRouter
 	router = httpAPI.SetupRouter(
@@ -59,7 +63,7 @@ func NewServer(
 	// Set up GraphQL
 	graphql.SetupGraphQL(
 		router,  // This router instance is created but never assigned to the Server struct
-		userService,
+		userUsecase,
 		jwtService,
 	)
 
@@ -78,7 +82,7 @@ func NewServer(
 		router:         router,
 		httpServer:     httpServer,
 		jwtService:     jwtService,
-		userService:    userService,
+		userUsecase:    userUsecase,
 	}
 }
 

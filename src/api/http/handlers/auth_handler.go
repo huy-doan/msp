@@ -4,18 +4,18 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vnlab/makeshop-payment/src/application/services"
+	"github.com/vnlab/makeshop-payment/src/usecase"
 )
 
 // AuthHandler handles authentication-related HTTP requests
 type AuthHandler struct {
-	userService *services.UserService
+	userUsecase *usecase.UserUsecase
 }
 
 // NewAuthHandler creates a new AuthHandler
-func NewAuthHandler(userService *services.UserService) *AuthHandler {
+func NewAuthHandler(userUsecase *usecase.UserUsecase) *AuthHandler {
 	return &AuthHandler{
-		userService: userService,
+		userUsecase: userUsecase,
 	}
 }
 
@@ -25,19 +25,19 @@ func NewAuthHandler(userService *services.UserService) *AuthHandler {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param request body services.RegisterRequest true "User registration details"
+// @Param request body usecase.RegisterRequest true "User registration details"
 // @Success 201 {object} entities.User
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
-	var req services.RegisterRequest
+	var req usecase.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user, err := h.userService.Register(c.Request.Context(), req)
+	user, err := h.userUsecase.Register(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -52,20 +52,20 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param request body services.LoginRequest true "Login credentials"
-// @Success 200 {object} services.LoginResponse
+// @Param request body usecase.LoginRequest true "Login credentials"
+// @Success 200 {object} usecase.LoginResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
-	var req services.LoginRequest
+	var req usecase.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	resp, err := h.userService.Login(c.Request.Context(), req)
+	resp, err := h.userUsecase.Login(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -87,7 +87,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Router /users/profile [get]
 func (h *AuthHandler) GetProfile(c *gin.Context) {
 	userID, _ := c.Get("userId")
-	user, err := h.userService.GetUserByID(c.Request.Context(), userID.(string))
+	user, err := h.userUsecase.GetUserByID(c.Request.Context(), userID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -119,7 +119,7 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 	}
 
 	userID, _ := c.Get("userId")
-	user, err := h.userService.UpdateUserProfile(c.Request.Context(), userID.(string), req.FullName)
+	user, err := h.userUsecase.UpdateUserProfile(c.Request.Context(), userID.(string), req.FullName)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -152,11 +152,36 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	}
 
 	userID, _ := c.Get("userId")
-	err := h.userService.ChangePassword(c.Request.Context(), userID.(string), req.CurrentPassword, req.NewPassword)
+	err := h.userUsecase.ChangePassword(c.Request.Context(), userID.(string), req.CurrentPassword, req.NewPassword)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
+}
+
+// Logout godoc
+// @Summary Logout user
+// @Description Revoke the access token of the authenticated user
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /auth/logout [post]
+func (h *AuthHandler) Logout(c *gin.Context) {
+	// Lấy token từ context (đã được lưu bởi middleware)
+	tokenString, exists := c.Get("token")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "no token found"})
+		return
+	}
+	
+	// Thêm token vào blacklist
+	h.userUsecase.GetJWTService().BlacklistToken(tokenString.(string))
+	
+	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }

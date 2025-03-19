@@ -1,4 +1,4 @@
-package services
+package usecase
 
 import (
 	"context"
@@ -9,15 +9,15 @@ import (
 	"github.com/vnlab/makeshop-payment/src/infrastructure/auth"
 )
 
-// UserService handles user-related business logic
-type UserService struct {
+// UserUsecase handles user-related business logic
+type UserUsecase struct {
 	userRepo   repositories.UserRepository
 	jwtService *auth.JWTService
 }
 
-// NewUserService creates a new UserService
-func NewUserService(userRepo repositories.UserRepository, jwtService *auth.JWTService) *UserService {
-	return &UserService{
+// NewUserUseCase creates a new UserUsecase
+func NewUserUseCase(userRepo repositories.UserRepository, jwtService *auth.JWTService) *UserUsecase {
+	return &UserUsecase{
 		userRepo:   userRepo,
 		jwtService: jwtService,
 	}
@@ -44,8 +44,8 @@ type LoginResponse struct {
 }
 
 // Login authenticates a user and returns a JWT token
-func (s *UserService) Login(ctx context.Context, req LoginRequest) (*LoginResponse, error) {
-	user, err := s.userRepo.FindByUsername(ctx, req.Username)
+func (uc *UserUsecase) Login(ctx context.Context, req LoginRequest) (*LoginResponse, error) {
+	user, err := uc.userRepo.FindByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (s *UserService) Login(ctx context.Context, req LoginRequest) (*LoginRespon
 		return nil, errors.New("invalid username or password")
 	}
 
-	token, err := s.jwtService.GenerateToken(user)
+	token, err := uc.jwtService.GenerateToken(user)
 	if err != nil {
 		return nil, err
 	}
@@ -70,9 +70,9 @@ func (s *UserService) Login(ctx context.Context, req LoginRequest) (*LoginRespon
 }
 
 // Register creates a new user
-func (s *UserService) Register(ctx context.Context, req RegisterRequest) (*entities.User, error) {
+func (uc *UserUsecase) Register(ctx context.Context, req RegisterRequest) (*entities.User, error) {
 	// Check if username already exists
-	existingUser, err := s.userRepo.FindByUsername(ctx, req.Username)
+	existingUser, err := uc.userRepo.FindByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (s *UserService) Register(ctx context.Context, req RegisterRequest) (*entit
 	}
 
 	// Check if email already exists
-	existingUser, err = s.userRepo.FindByEmail(ctx, req.Email)
+	existingUser, err = uc.userRepo.FindByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (s *UserService) Register(ctx context.Context, req RegisterRequest) (*entit
 	}
 
 	// Save user to database
-	if err := s.userRepo.Create(ctx, user); err != nil {
+	if err := uc.userRepo.Create(ctx, user); err != nil {
 		return nil, err
 	}
 
@@ -104,13 +104,13 @@ func (s *UserService) Register(ctx context.Context, req RegisterRequest) (*entit
 }
 
 // GetUserByID retrieves a user by ID
-func (s *UserService) GetUserByID(ctx context.Context, id string) (*entities.User, error) {
-	return s.userRepo.FindByID(ctx, id)
+func (uc *UserUsecase) GetUserByID(ctx context.Context, id string) (*entities.User, error) {
+	return uc.userRepo.FindByID(ctx, id)
 }
 
 // UpdateUserProfile updates a user's profile
-func (s *UserService) UpdateUserProfile(ctx context.Context, userID string, fullName string) (*entities.User, error) {
-	user, err := s.userRepo.FindByID(ctx, userID)
+func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, userID string, fullName string) (*entities.User, error) {
+	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (s *UserService) UpdateUserProfile(ctx context.Context, userID string, full
 		return nil, err
 	}
 
-	if err := s.userRepo.Update(ctx, user); err != nil {
+	if err := uc.userRepo.Update(ctx, user); err != nil {
 		return nil, err
 	}
 
@@ -130,8 +130,8 @@ func (s *UserService) UpdateUserProfile(ctx context.Context, userID string, full
 }
 
 // ChangePassword changes a user's password
-func (s *UserService) ChangePassword(ctx context.Context, userID, currentPassword, newPassword string) error {
-	user, err := s.userRepo.FindByID(ctx, userID)
+func (uc *UserUsecase) ChangePassword(ctx context.Context, userID, currentPassword, newPassword string) error {
+	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -147,11 +147,11 @@ func (s *UserService) ChangePassword(ctx context.Context, userID, currentPasswor
 		return err
 	}
 
-	return s.userRepo.Update(ctx, user)
+	return uc.userRepo.Update(ctx, user)
 }
 
 // ListUsers lists users with pagination
-func (s *UserService) ListUsers(ctx context.Context, page, pageSize int) ([]*entities.User, int, error) {
+func (uc *UserUsecase) ListUsers(ctx context.Context, page, pageSize int) ([]*entities.User, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -159,5 +159,10 @@ func (s *UserService) ListUsers(ctx context.Context, page, pageSize int) ([]*ent
 		pageSize = 10
 	}
 
-	return s.userRepo.List(ctx, page, pageSize)
+	return uc.userRepo.List(ctx, page, pageSize)
+}
+
+// GetJWTService trả về JWTService
+func (uc *UserUsecase) GetJWTService() *auth.JWTService {
+	return uc.jwtService
 }

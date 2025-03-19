@@ -5,18 +5,18 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vnlab/makeshop-payment/src/application/services"
+	"github.com/vnlab/makeshop-payment/src/usecase"
 )
 
 // UserHandler handles user-related HTTP requests
 type UserHandler struct {
-	userService *services.UserService
+	userUsecase *usecase.UserUsecase
 }
 
 // NewUserHandler creates a new UserHandler
-func NewUserHandler(userService *services.UserService) *UserHandler {
+func NewUserHandler(userUsecase *usecase.UserUsecase) *UserHandler {
 	return &UserHandler{
-		userService: userService,
+		userUsecase: userUsecase,
 	}
 }
 
@@ -42,7 +42,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.userService.GetUserByID(c.Request.Context(), id)
+	user, err := h.userUsecase.GetUserByID(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -85,7 +85,7 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		pageSize = 100
 	}
 
-	users, totalPages, err := h.userService.ListUsers(c.Request.Context(), page, pageSize)
+	users, totalPages, err := h.userUsecase.ListUsers(c.Request.Context(), page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

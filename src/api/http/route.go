@@ -1,6 +1,8 @@
 package http
 
 import (
+	"os"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -19,13 +21,11 @@ func SetupRouter(
 	jwtService *auth.JWTService,
 ) *gin.Engine {
 	// FIX: Use the provided router instead of creating a new one
-	// router := gin.Default()
 
 	// Configure CORS
 	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
+	config.AllowOrigins = []string{os.Getenv("API_FRONT_URL")}
 	config.AllowCredentials = true
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
 	router.Use(cors.New(config))
 
