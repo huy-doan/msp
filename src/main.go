@@ -8,6 +8,8 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/vnlab/makeshop-payment/docs"
 	"github.com/vnlab/makeshop-payment/src/api"
+	"github.com/vnlab/makeshop-payment/src/infrastructure/config"
+	"github.com/vnlab/makeshop-payment/src/infrastructure/logger"
 	"github.com/vnlab/makeshop-payment/src/infrastructure/persistence/mysql"
 	"github.com/vnlab/makeshop-payment/src/infrastructure/persistence/repositories"
 )
@@ -41,8 +43,17 @@ func init() {
 // @in header
 // @name Authorization
 func main() {
+	appConfig := config.LoadConfig()
+	// Initialize logger
+	appLogger := logger.NewLogger(&logger.Config{
+		LogLevel:      appConfig.LogLevel,
+		LogDirectory:  appConfig.LogDirectory,
+		EnableConsole: appConfig.EnableConsole,
+		EnableSQLLog:  appConfig.EnableSQLLog,
+	})
+
 	// Connect to database
-	db, err := mysql.NewConnection()
+	db, err := mysql.NewConnection(appConfig, appLogger)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}

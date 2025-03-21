@@ -5,7 +5,7 @@ import (
 	"errors"
 	"math"
 
-	"github.com/vnlab/makeshop-payment/src/domain/entities"
+	models "github.com/vnlab/makeshop-payment/src/domain/models"
 	"github.com/vnlab/makeshop-payment/src/domain/repositories"
 	"gorm.io/gorm"
 )
@@ -23,8 +23,8 @@ func NewUserRepository(db *gorm.DB) repositories.UserRepository {
 }
 
 // FindByID finds a user by ID
-func (r *UserRepositoryImpl) FindByID(ctx context.Context, id int) (*entities.User, error) {
-	var user entities.User
+func (r *UserRepositoryImpl) FindByID(ctx context.Context, id int) (*models.User, error) {
+	var user models.User
 	result := r.db.Preload("Role").First(&user, id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -36,8 +36,8 @@ func (r *UserRepositoryImpl) FindByID(ctx context.Context, id int) (*entities.Us
 }
 
 // FindByEmail finds a user by email
-func (r *UserRepositoryImpl) FindByEmail(ctx context.Context, email string) (*entities.User, error) {
-	var user entities.User
+func (r *UserRepositoryImpl) FindByEmail(ctx context.Context, email string) (*models.User, error) {
+	var user models.User
 	result := r.db.Preload("Role").Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -49,27 +49,27 @@ func (r *UserRepositoryImpl) FindByEmail(ctx context.Context, email string) (*en
 }
 
 // Create creates a new user
-func (r *UserRepositoryImpl) Create(ctx context.Context, user *entities.User) error {
+func (r *UserRepositoryImpl) Create(ctx context.Context, user *models.User) error {
 	return r.db.Create(user).Error
 }
 
 // Update updates an existing user
-func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) error {
+func (r *UserRepositoryImpl) Update(ctx context.Context, user *models.User) error {
 	return r.db.Save(user).Error
 }
 
 // Delete soft-deletes a user by ID
 func (r *UserRepositoryImpl) Delete(ctx context.Context, id int) error {
-	return r.db.Delete(&entities.User{}, id).Error
+	return r.db.Delete(&models.User{}, id).Error
 }
 
 // List lists all users with pagination
-func (r *UserRepositoryImpl) List(ctx context.Context, page, pageSize int) ([]*entities.User, int, error) {
-	var users []*entities.User
+func (r *UserRepositoryImpl) List(ctx context.Context, page, pageSize int) ([]*models.User, int, error) {
+	var users []*models.User
 	var count int64
 
 	// Count total records
-	if err := r.db.Model(&entities.User{}).Count(&count).Error; err != nil {
+	if err := r.db.Model(&models.User{}).Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 

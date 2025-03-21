@@ -5,7 +5,7 @@ import (
 
 	"github.com/vnlab/makeshop-payment/src/api/graphql/generated"
 	"github.com/vnlab/makeshop-payment/src/api/graphql/middleware"
-	"github.com/vnlab/makeshop-payment/src/domain/entities"
+	"github.com/vnlab/makeshop-payment/src/domain/models"
 	"github.com/vnlab/makeshop-payment/src/usecase"
 )
 
@@ -37,7 +37,7 @@ func (r *mutationResolver) Login(ctx context.Context, input generated.LoginInput
 }
 
 // Register implements the register mutation
-func (r *mutationResolver) Register(ctx context.Context, input generated.RegisterInput) (*entities.User, error) {
+func (r *mutationResolver) Register(ctx context.Context, input generated.RegisterInput) (*models.User, error) {
 	registerReq := usecase.RegisterRequest{
 		Email:         input.Email,
 		Password:      input.Password,
@@ -56,7 +56,7 @@ func (r *mutationResolver) Register(ctx context.Context, input generated.Registe
 }
 
 // UpdateProfile implements the updateProfile mutation
-func (r *mutationResolver) UpdateProfile(ctx context.Context, input generated.UpdateProfileInput) (*entities.User, error) {
+func (r *mutationResolver) UpdateProfile(ctx context.Context, input generated.UpdateProfileInput) (*models.User, error) {
 	err := middleware.CheckAuth(ctx)
 	if err != nil {
 		return nil, ErrNotAuthenticated

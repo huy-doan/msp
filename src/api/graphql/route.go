@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/vnlab/makeshop-payment/src/api/graphql/middleware"
 	"github.com/vnlab/makeshop-payment/src/api/http/handlers"
@@ -28,6 +29,13 @@ func SetupGraphQL(
 		{
 			// Main endpoint for GraphQL API
 			graphqlRoute.POST("", graphHandler.QueryHandler())
+		}
+
+		// GraphQL Playground (development only)
+		if gin.Mode() != gin.ReleaseMode {
+			v1.GET("/playground", func(c *gin.Context) {
+				playground.Handler("GraphQL Playground", "/api/v1/graphql").ServeHTTP(c.Writer, c.Request)
+			})
 		}
 	}
 }

@@ -5,12 +5,12 @@ package generated
 import (
 	"time"
 
-	"github.com/vnlab/makeshop-payment/src/domain/entities"
+	"github.com/vnlab/makeshop-payment/src/domain/models"
 )
 
 type AuthResponse struct {
-	Token string         `json:"token"`
-	User  *entities.User `json:"user"`
+	Token string       `json:"token"`
+	User  *models.User `json:"user"`
 }
 
 type ChangePasswordInput struct {
@@ -41,10 +41,10 @@ type Mutation struct {
 }
 
 type PaginatedUsers struct {
-	Users      []*entities.User `json:"users"`
-	Page       int              `json:"page"`
-	PageSize   int              `json:"pageSize"`
-	TotalPages int              `json:"totalPages"`
+	Users      []*models.User `json:"users"`
+	Page       int            `json:"page"`
+	PageSize   int            `json:"pageSize"`
+	TotalPages int            `json:"totalPages"`
 }
 
 type Query struct {

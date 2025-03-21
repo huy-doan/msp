@@ -16,7 +16,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	"github.com/vnlab/makeshop-payment/src/domain/entities"
+	"github.com/vnlab/makeshop-payment/src/domain/models"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -112,19 +112,19 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	Register(ctx context.Context, input RegisterInput) (*entities.User, error)
+	Register(ctx context.Context, input RegisterInput) (*models.User, error)
 	Login(ctx context.Context, input LoginInput) (*AuthResponse, error)
 	Logout(ctx context.Context) (bool, error)
-	UpdateProfile(ctx context.Context, input UpdateProfileInput) (*entities.User, error)
+	UpdateProfile(ctx context.Context, input UpdateProfileInput) (*models.User, error)
 	ChangePassword(ctx context.Context, input ChangePasswordInput) (bool, error)
 }
 type QueryResolver interface {
-	Me(ctx context.Context) (*entities.User, error)
-	User(ctx context.Context, id int) (*entities.User, error)
+	Me(ctx context.Context) (*models.User, error)
+	User(ctx context.Context, id int) (*models.User, error)
 	Users(ctx context.Context, page *int, pageSize *int) (*PaginatedUsers, error)
 }
 type UserResolver interface {
-	MfaType(ctx context.Context, obj *entities.User) (*MFAType, error)
+	MfaType(ctx context.Context, obj *models.User) (*MFAType, error)
 }
 
 type executableSchema struct {
@@ -906,9 +906,9 @@ func (ec *executionContext) _AuthResponse_user(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*entities.User)
+	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AuthResponse_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1248,9 +1248,9 @@ func (ec *executionContext) _Mutation_register(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*entities.User)
+	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_register(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1442,9 +1442,9 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*entities.User)
+	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1586,9 +1586,9 @@ func (ec *executionContext) _PaginatedUsers_users(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*entities.User)
+	res := resTmp.([]*models.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PaginatedUsers_users(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1796,9 +1796,9 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*entities.User)
+	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1871,9 +1871,9 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*entities.User)
+	res := resTmp.(*models.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2128,7 +2128,7 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Role_id(ctx context.Context, field graphql.CollectedField, obj *entities.Role) (ret graphql.Marshaler) {
+func (ec *executionContext) _Role_id(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Role_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2172,7 +2172,7 @@ func (ec *executionContext) fieldContext_Role_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _Role_name(ctx context.Context, field graphql.CollectedField, obj *entities.Role) (ret graphql.Marshaler) {
+func (ec *executionContext) _Role_name(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Role_name(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2216,7 +2216,7 @@ func (ec *executionContext) fieldContext_Role_name(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Role_code(ctx context.Context, field graphql.CollectedField, obj *entities.Role) (ret graphql.Marshaler) {
+func (ec *executionContext) _Role_code(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Role_code(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2260,7 +2260,7 @@ func (ec *executionContext) fieldContext_Role_code(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Role_createdAt(ctx context.Context, field graphql.CollectedField, obj *entities.Role) (ret graphql.Marshaler) {
+func (ec *executionContext) _Role_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Role_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2304,7 +2304,7 @@ func (ec *executionContext) fieldContext_Role_createdAt(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Role_updatedAt(ctx context.Context, field graphql.CollectedField, obj *entities.Role) (ret graphql.Marshaler) {
+func (ec *executionContext) _Role_updatedAt(ctx context.Context, field graphql.CollectedField, obj *models.Role) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Role_updatedAt(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2348,7 +2348,7 @@ func (ec *executionContext) fieldContext_Role_updatedAt(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_id(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2392,7 +2392,7 @@ func (ec *executionContext) fieldContext_User_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _User_email(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_email(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_email(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2436,7 +2436,7 @@ func (ec *executionContext) fieldContext_User_email(ctx context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _User_roleId(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_roleId(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_roleId(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2480,7 +2480,7 @@ func (ec *executionContext) fieldContext_User_roleId(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _User_role(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_role(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_role(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2503,9 +2503,9 @@ func (ec *executionContext) _User_role(ctx context.Context, field graphql.Collec
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*entities.Role)
+	res := resTmp.(*models.Role)
 	fc.Result = res
-	return ec.marshalORole2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐRole(ctx, field.Selections, res)
+	return ec.marshalORole2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐRole(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_role(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2533,7 +2533,7 @@ func (ec *executionContext) fieldContext_User_role(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _User_enabledMFA(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_enabledMFA(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_enabledMFA(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2577,7 +2577,7 @@ func (ec *executionContext) fieldContext_User_enabledMFA(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _User_mFATypeId(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_mFATypeId(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_mFATypeId(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2618,7 +2618,7 @@ func (ec *executionContext) fieldContext_User_mFATypeId(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _User_mfaType(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_mfaType(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_mfaType(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2673,7 +2673,7 @@ func (ec *executionContext) fieldContext_User_mfaType(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _User_firstName(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_firstName(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_firstName(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2717,7 +2717,7 @@ func (ec *executionContext) fieldContext_User_firstName(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _User_lastName(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_lastName(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_lastName(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2761,7 +2761,7 @@ func (ec *executionContext) fieldContext_User_lastName(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _User_firstNameKana(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_firstNameKana(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_firstNameKana(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2805,7 +2805,7 @@ func (ec *executionContext) fieldContext_User_firstNameKana(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _User_lastNameKana(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_lastNameKana(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_lastNameKana(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2849,7 +2849,7 @@ func (ec *executionContext) fieldContext_User_lastNameKana(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _User_avatarUrl(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_avatarUrl(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_avatarUrl(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2890,7 +2890,7 @@ func (ec *executionContext) fieldContext_User_avatarUrl(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _User_fullName(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_fullName(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_fullName(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2934,7 +2934,7 @@ func (ec *executionContext) fieldContext_User_fullName(ctx context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _User_fullNameKana(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_fullNameKana(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_fullNameKana(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -2978,7 +2978,7 @@ func (ec *executionContext) fieldContext_User_fullNameKana(ctx context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _User_createdAt(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -3022,7 +3022,7 @@ func (ec *executionContext) fieldContext_User_createdAt(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _User_updatedAt(ctx context.Context, field graphql.CollectedField, obj *entities.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_updatedAt(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_updatedAt(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -5413,7 +5413,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var roleImplementors = []string{"Role"}
 
-func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj *entities.Role) graphql.Marshaler {
+func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj *models.Role) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, roleImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -5472,7 +5472,7 @@ func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj
 
 var userImplementors = []string{"User"}
 
-func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *entities.User) graphql.Marshaler {
+func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *models.User) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -6037,11 +6037,11 @@ func (ec *executionContext) unmarshalNUpdateProfileInput2githubᚗcomᚋvnlabᚋ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUser(ctx context.Context, sel ast.SelectionSet, v entities.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v models.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*entities.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6065,7 +6065,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋvnlabᚋmakeshop�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6085,7 +6085,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋvnlabᚋmakeshop�
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUser(ctx context.Context, sel ast.SelectionSet, v *entities.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6397,7 +6397,7 @@ func (ec *executionContext) marshalOMFAType2ᚖgithubᚗcomᚋvnlabᚋmakeshop�
 	return ec._MFAType(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalORole2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐRole(ctx context.Context, sel ast.SelectionSet, v *entities.Role) graphql.Marshaler {
+func (ec *executionContext) marshalORole2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v *models.Role) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -6420,7 +6420,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋentitiesᚐUser(ctx context.Context, sel ast.SelectionSet, v *entities.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋvnlabᚋmakeshopᚑpaymentᚋsrcᚋdomainᚋmodelsᚐUser(ctx context.Context, sel ast.SelectionSet, v *models.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

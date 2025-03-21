@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/vnlab/makeshop-payment/src/domain/entities"
+	models "github.com/vnlab/makeshop-payment/src/domain/models"
 	"github.com/vnlab/makeshop-payment/src/domain/repositories"
 	"gorm.io/gorm"
 )
@@ -22,8 +22,8 @@ func NewRoleRepository(db *gorm.DB) repositories.RoleRepository {
 }
 
 // FindByID finds a role by ID
-func (r *RoleRepositoryImpl) FindByID(ctx context.Context, id int) (*entities.Role, error) {
-	var role entities.Role
+func (r *RoleRepositoryImpl) FindByID(ctx context.Context, id int) (*models.Role, error) {
+	var role models.Role
 	result := r.db.First(&role, id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -35,8 +35,8 @@ func (r *RoleRepositoryImpl) FindByID(ctx context.Context, id int) (*entities.Ro
 }
 
 // FindByCode finds a role by code
-func (r *RoleRepositoryImpl) FindByCode(ctx context.Context, code string) (*entities.Role, error) {
-	var role entities.Role
+func (r *RoleRepositoryImpl) FindByCode(ctx context.Context, code string) (*models.Role, error) {
+	var role models.Role
 	result := r.db.Where("code = ?", code).First(&role)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

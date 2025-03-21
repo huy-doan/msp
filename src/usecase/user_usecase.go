@@ -3,9 +3,8 @@ package usecase
 import (
 	"context"
 	"errors"
-	"fmt"
 
-	"github.com/vnlab/makeshop-payment/src/domain/entities"
+	models "github.com/vnlab/makeshop-payment/src/domain/models"
 	"github.com/vnlab/makeshop-payment/src/domain/repositories"
 	"github.com/vnlab/makeshop-payment/src/infrastructure/auth"
 )
@@ -57,13 +56,12 @@ type UpdateProfileRequest struct {
 // LoginResponse represents a login response with token
 type LoginResponse struct {
 	Token string         `json:"token"`
-	User  *entities.User `json:"user"`
+	User  *models.User `json:"user"`
 }
 
 // Login authenticates a user and returns a JWT token
 func (uc *UserUsecase) Login(ctx context.Context, req LoginRequest) (*LoginResponse, error) {
 	user, err := uc.userRepo.FindByEmail(ctx, req.Email)
-	fmt.Printf("user: %v\n", user)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +86,7 @@ func (uc *UserUsecase) Login(ctx context.Context, req LoginRequest) (*LoginRespo
 }
 
 // Register creates a new user
-func (uc *UserUsecase) Register(ctx context.Context, req RegisterRequest) (*entities.User, error) {
+func (uc *UserUsecase) Register(ctx context.Context, req RegisterRequest) (*models.User, error) {
 	// Check if email already exists
 	existingUser, err := uc.userRepo.FindByEmail(ctx, req.Email)
 	if err != nil {
@@ -99,7 +97,7 @@ func (uc *UserUsecase) Register(ctx context.Context, req RegisterRequest) (*enti
 	}
 
 	// Get customer role
-	customerRole, err := uc.roleRepo.FindByCode(ctx, string(entities.RoleCodeNormalUser))
+	customerRole, err := uc.roleRepo.FindByCode(ctx, string(models.RoleCodeNormalUser))
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +106,7 @@ func (uc *UserUsecase) Register(ctx context.Context, req RegisterRequest) (*enti
 	}
 
 	// Create new user with customer role
-	user, err := entities.NewUser(
+	user, err := models.NewUser(
 		req.Email,
 		req.Password,
 		req.FirstName,
@@ -136,12 +134,12 @@ func (uc *UserUsecase) Register(ctx context.Context, req RegisterRequest) (*enti
 }
 
 // GetUserByID retrieves a user by ID
-func (uc *UserUsecase) GetUserByID(ctx context.Context, id int) (*entities.User, error) {
+func (uc *UserUsecase) GetUserByID(ctx context.Context, id int) (*models.User, error) {
 	return uc.userRepo.FindByID(ctx, id)
 }
 
 // UpdateUserProfile updates a user's profile
-func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, userID int, req UpdateProfileRequest) (*entities.User, error) {
+func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, userID int, req UpdateProfileRequest) (*models.User, error) {
 	user, err := uc.userRepo.FindByID(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -183,7 +181,7 @@ func (uc *UserUsecase) ChangePassword(ctx context.Context, userID int, currentPa
 }
 
 // ListUsers lists users with pagination
-func (uc *UserUsecase) ListUsers(ctx context.Context, page, pageSize int) ([]*entities.User, int, error) {
+func (uc *UserUsecase) ListUsers(ctx context.Context, page, pageSize int) ([]*models.User, int, error) {
 	if page < 1 {
 		page = 1
 	}

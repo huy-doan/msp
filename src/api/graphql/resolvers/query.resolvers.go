@@ -6,7 +6,7 @@ import (
 
 	"github.com/vnlab/makeshop-payment/src/api/graphql/generated"
 	"github.com/vnlab/makeshop-payment/src/api/graphql/middleware"
-	"github.com/vnlab/makeshop-payment/src/domain/entities"
+	"github.com/vnlab/makeshop-payment/src/domain/models"
 )
 
 // Query returns the QueryResolver implementation
@@ -25,7 +25,7 @@ var (
 )
 
 // Me returns the currently authenticated user
-func (r *queryResolver) Me(ctx context.Context) (*entities.User, error) {
+func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
 	// Check auth
 	err := middleware.CheckAuth(ctx)
 	if err != nil {
@@ -46,7 +46,7 @@ func (r *queryResolver) Me(ctx context.Context) (*entities.User, error) {
 }
 
 // User returns a user by ID
-func (r *queryResolver) User(ctx context.Context, id int) (*entities.User, error) {
+func (r *queryResolver) User(ctx context.Context, id int) (*models.User, error) {
 	// Check auth
 	err := middleware.CheckAuth(ctx)
 	if err != nil {

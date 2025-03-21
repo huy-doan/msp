@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/vnlab/makeshop-payment/src/domain/entities"
+	models "github.com/vnlab/makeshop-payment/src/domain/models"
 )
 
 // JWTService provides JWT token generation and validation
@@ -57,7 +57,7 @@ func NewJWTService() *JWTService {
 }
 
 // GenerateToken generates a new JWT token for a user
-func (s *JWTService) GenerateToken(user *entities.User) (string, error) {
+func (s *JWTService) GenerateToken(user *models.User) (string, error) {
 	if user == nil {
 		return "", errors.New("user is nil")
 	}

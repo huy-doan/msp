@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vnlab/makeshop-payment/src/domain/entities"
+	models "github.com/vnlab/makeshop-payment/src/domain/models"
 	"github.com/vnlab/makeshop-payment/src/infrastructure/auth"
 )
 
@@ -123,5 +123,5 @@ func CheckRoleCode(ctx context.Context, requiredCode string) error {
 // IsAdminRole checks if the authenticated user has admin role
 func IsAdminRole(ctx context.Context) bool {
     roleCode, ok := ctx.Value("roleCode").(string)
-    return ok && roleCode == string(entities.RoleCodeAdmin)
+    return ok && roleCode == string(models.RoleCodeAdmin)
 }

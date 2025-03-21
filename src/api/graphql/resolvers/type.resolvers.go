@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/vnlab/makeshop-payment/src/api/graphql/generated"
-	"github.com/vnlab/makeshop-payment/src/domain/entities"
+	"github.com/vnlab/makeshop-payment/src/domain/models"
 )
 
 type typeResolver struct {
@@ -13,7 +13,7 @@ type typeResolver struct {
 
 // If you need to process specific fields, provide them as separate functions
 // For example:
-// func (r *Resolver) GetUserPosts(ctx context.Context, user *entities.User) ([]*Post, error) {
+// func (r *Resolver) GetUserPosts(ctx context.Context, user *models.User) ([]*Post, error) {
 //     // Custom logic here to fetch user's posts
 // }
 
@@ -27,14 +27,14 @@ type userResolver struct {
     *Resolver
 }
 
-// MfaType implements logic để lấy thông tin MFA type của user
-func (r *userResolver) MfaType(ctx context.Context, obj *entities.User) (*generated.MFAType, error) {
+// MFA implementation
+func (r *userResolver) MfaType(ctx context.Context, obj *models.User) (*generated.MFAType, error) {
     // Nếu user không có MFA type được bật
     if obj.MFATypeID == nil || obj.MFAType == nil {
         return nil, nil
     }
     
-    // Chuyển đổi từ entities.MFAType sang generated.MFAType
+    // convert from models.MFAType to generated.MFAType
     return &generated.MFAType{
         ID:        obj.MFAType.ID,
         No:        obj.MFAType.No,

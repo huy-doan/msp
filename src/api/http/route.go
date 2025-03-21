@@ -29,8 +29,9 @@ func SetupRouter(
 		})
 	})
 
-	// Setup Swagger
-	router.GET("/swaggers/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
+	if gin.Mode() != gin.ReleaseMode {
+		// Setup Swagger
+		router.GET("/swaggers/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 	return router
 }
